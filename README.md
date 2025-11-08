@@ -26,19 +26,19 @@ Updates mirrors, system, and AUR — logs everything, trims old logs, and tells 
 ## ⚙️ Installation
 
 1. **Save the script**
-   ```bash
+   ``` bash
    mkdir -p ~/bin
    nano ~/bin/arch-weekly-update
    chmod +x ~/bin/arch-weekly-update
    ```
 2. Ensure ~/bin is in your PATH
-   ```bash 
+   ``` bash 
    echo $PATH | grep -q "$HOME/bin" || echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc # or .zshrc 
    source ~/.bashrc 
    ```
 
 ## 🧩 Usage
-    Run it anytime with:
-    ``` bash 
-    sudo arch-weekly-update
-    ```
+Run it anytime with:
+  ``` bash 
+  sudo arch-weekly-update
+  ```
