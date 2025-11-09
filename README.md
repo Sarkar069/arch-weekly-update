@@ -56,5 +56,5 @@ sudo less /var/log/arch-weekly-update.log
 ```
 Find warnings or errors:
 ```bash 
-sudo grep -E "⚠️|error|failed" /var/log/arch-weekly-update.log
+sudo grep -E "error|failed" /var/log/arch-weekly-update.log
 ```
