@@ -79,7 +79,15 @@ fi
 # --- Mirrorlist update
 log "$BLUE" "\n🚀 Updating mirrorlist for faster downloads..."
 if command -v reflector >/dev/null 2>&1; then
-  log_cmd reflector --country 'India,Singapore,Japan' --age 24 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+  if ! timeout 45s reflector --country 'India,Singapore,Japan' \
+    --age 24 \
+    --protocol https \
+    --sort rate \
+    --threads 5 \
+    --timeout 10 \
+    --save /etc/pacman.d/mirrorlist; then
+    log "$YELLOW" "⚠️  reflector timed out or failed — keeping existing mirrorlist."
+  fi
 else
   log "$YELLOW" "⚠️  reflector not found, skipping mirror update."
 fi
@@ -139,4 +147,3 @@ fi
 log "$GREEN" "\n✅ Update complete!"
 log "$CYAN" "🧾 Log saved to: $LOGFILE"
 log "$CYAN" "-----------------------------------------------"
-
