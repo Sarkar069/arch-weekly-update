@@ -25,20 +25,21 @@ Updates mirrors, system, and AUR — logs everything, trims old logs, and tells 
 
 ## ⚙️ Installation
 1. **Clone the repo**
-   ```bash 
-   git clone https://github.com/Sarkar069/arch-weekly-update.git
-   ```
+```bash 
+git clone https://github.com/Sarkar069/arch-weekly-update.git
+```
 
 2. **move or copy the script**
-   ``` bash
-   mkdir -p ~/bin
-   chmod +x ~/bin/arch-weekly-update
-   ```
+``` bash
+mkdir -p ~/bin
+mv arch-weekly-update/arch-weekly-update ~/bin
+chmod +x ~/bin/arch-weekly-update
+```
 3. Ensure ~/bin is in your PATH
-   ``` bash 
-   echo $PATH | grep -q "$HOME/bin" || echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc # or .zshrc 
-   source ~/.bashrc 
-   ```
+``` bash 
+  echo $PATH | grep -q "$HOME/bin" || echo 'export PATH="$HOME/bin:$PATH"' >> ~/.bashrc # or .zshrc 
+  source ~/.bashrc 
+```
 
 ## 🧩 Usage
 Run it anytime with:
