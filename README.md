@@ -31,8 +31,8 @@ git clone https://github.com/Sarkar069/arch-weekly-update.git
 **move or copy the script**
 ``` bash
 mkdir -p ~/bin
-mv arch-weekly-update/arch-weekly-update ~/bin
-chmod +x ~/bin/arch-weekly-update
+mv arch-weekly-update/archeekly ~/bin
+chmod +x ~/bin/archeekly
 ```
 Ensure ~/bin is in your PATH
 ``` bash 
@@ -43,7 +43,7 @@ source ~/.bashrc
 ## 🧩 Usage
 Run it anytime with:
 ``` bash 
-sudo ~/bin/arch-weekly-update
+sudo ~/bin/archeekly
 ```
 ## 🧾 Checking Logs
 View the most recent update:
