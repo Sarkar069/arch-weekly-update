@@ -1,0 +1,149 @@
+#!/bin/bash
+# 🛠️ Simple Weekly Arch Linux Update Script (Enhanced + Server-Safe)
+# - Works interactively or via cron/systemd
+# - Logs everything to /var/log/arch-weekly-update.log
+# - Safe for LTS setups, checks .pacnew, and suggests reboot
+
+LOGFILE="/var/log/arch-weekly-update.log"
+
+# --- Ensure running as root
+if [[ $EUID -ne 0 ]]; then
+  echo "⚠️  Please run this script as root (sudo $0)"
+  exit 1
+fi
+
+# --- Auto-trim log file (keep last 1000 lines)
+if [[ -f "$LOGFILE" ]]; then
+  tail -n 1000 "$LOGFILE" >"${LOGFILE}.tmp" && mv "${LOGFILE}.tmp" "$LOGFILE"
+fi
+
+# --- Ensure log file exists and is writable
+touch "$LOGFILE"
+chmod 644 "$LOGFILE"
+
+# --- Colors (safe even in non-interactive shells)
+if [[ -t 1 ]]; then
+  BOLD=$(tput bold)
+  RESET=$(tput sgr0)
+  GREEN=$(tput setaf 2)
+  YELLOW=$(tput setaf 3)
+  BLUE=$(tput setaf 4)
+  RED=$(tput setaf 1)
+  CYAN=$(tput setaf 6)
+else
+  BOLD=""
+  RESET=""
+  GREEN=""
+  YELLOW=""
+  BLUE=""
+  RED=""
+  CYAN=""
+fi
+
+# --- Helper: print colored to screen + plain to log
+log() {
+  local color="$1"
+  shift
+  local message="$*"
+  echo -e "${color}${message}${RESET}"
+  echo -e "$(echo "$message" | sed 's/\x1b\[[0-9;]*m//g')" >>"$LOGFILE"
+}
+
+# --- Helper: run command + log output
+log_cmd() {
+  echo -e "\n$ ${*}" >>"$LOGFILE"
+  "$@" 2>&1 | tee -a "$LOGFILE"
+}
+
+# --- Header
+{
+  echo
+  echo "==============================================="
+  echo "🗓️  Arch Weekly Update — $(date '+%Y-%m-%d %H:%M:%S')"
+  echo "==============================================="
+  echo
+} >>"$LOGFILE"
+
+log "$CYAN" "🔍 Check Arch news first (https://archlinux.org/news/)..."
+log "$YELLOW" "If there are recent posts about manual intervention, read them before continuing!"
+echo
+
+# --- Ask before proceeding (skip if non-interactive)
+if [[ -t 1 ]]; then
+  read -p "Proceed with system update? (y/N): " confirm
+  [[ $confirm != [yY] ]] && exit 0
+else
+  confirm="y"
+fi
+
+# --- Mirrorlist update
+log "$BLUE" "\n🚀 Updating mirrorlist for faster downloads..."
+if command -v reflector >/dev/null 2>&1; then
+  if ! timeout 45s reflector --country 'India,Singapore,Japan' \
+    --age 24 \
+    --protocol https \
+    --sort rate \
+    --threads 5 \
+    --timeout 10 \
+    --save /etc/pacman.d/mirrorlist; then
+    log "$YELLOW" "⚠️  reflector timed out or failed — keeping existing mirrorlist."
+  fi
+else
+  log "$YELLOW" "⚠️  reflector not found, skipping mirror update."
+fi
+
+# --- System update
+log "$BLUE" "\n📦 Running system update with pacman..."
+log_cmd pacman -Syu --noconfirm
+
+# --- AUR update
+log "$BLUE" "\n🔧 Updating AUR packages with yay..."
+if command -v yay >/dev/null 2>&1; then
+  if [[ -n "$SUDO_USER" && "$SUDO_USER" != "root" ]]; then
+    log_cmd sudo -u "$SUDO_USER" yay -Syu --noconfirm
+  else
+    log_cmd yay -Syu --noconfirm
+  fi
+else
+  log "$YELLOW" "⚠️  yay not found, skipping AUR updates."
+fi
+
+# --- Check for .pacnew files
+log "$CYAN" "\n🧹 Checking for .pacnew files..."
+pacnew_list=$(find /etc -name "*.pacnew")
+if [[ -n "$pacnew_list" ]]; then
+  echo "$pacnew_list" | tee -a "$LOGFILE"
+  pacnew_count=$(echo "$pacnew_list" | wc -l)
+  log "$YELLOW" "⚠️  Found $pacnew_count .pacnew files — review with 'sudo -e' or 'diff'."
+else
+  log "$GREEN" "✅ No .pacnew files found."
+fi
+
+# --- Clean package cache
+log "$CYAN" "\n🧽 Cleaning old package cache..."
+if command -v paccache >/dev/null 2>&1; then
+  log_cmd paccache -rv
+else
+  log "$YELLOW" "⚠️  paccache not found (install pacman-contrib for cache cleanup)."
+fi
+
+# --- Optional reboot suggestion
+log "$CYAN" "\n🔎 Checking if reboot may be needed..."
+critical_pkgs=(linux linux-lts glibc systemd)
+needs_reboot=false
+for pkg in "${critical_pkgs[@]}"; do
+  if grep -q "$pkg" "$LOGFILE"; then
+    needs_reboot=true
+  fi
+done
+
+if $needs_reboot; then
+  log "$YELLOW" "🔄 Kernel/system libraries updated — reboot recommended."
+else
+  log "$GREEN" "✅ No core components updated; reboot not required."
+fi
+
+# --- Done
+log "$GREEN" "\n✅ Update complete!"
+log "$CYAN" "🧾 Log saved to: $LOGFILE"
+log "$CYAN" "-----------------------------------------------"
