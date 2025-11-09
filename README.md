@@ -41,20 +41,20 @@ Updates mirrors, system, and AUR — logs everything, trims old logs, and tells 
    ```
 
 ## 🧩 Usage
-- Run it anytime with:
-  ``` bash 
-  sudo ~/bin/arch-weekly-update
-  ```
+Run it anytime with:
+``` bash 
+sudo ~/bin/arch-weekly-update
+```
 ## 🧾 Checking Logs
-- View the most recent update:
+View the most recent update:
 ```bash
 sudo tail -n 30 /var/log/arch-weekly-update.log
 ```
-- Scroll through the full history:
+Scroll through the full history:
 ```bash
 sudo less /var/log/arch-weekly-update.log
 ```
-- Find warnings or errors:
+Find warnings or errors:
 ```bash 
 sudo grep -E "⚠️|error|failed" /var/log/arch-weekly-update.log
 ```
