@@ -42,7 +42,7 @@ Updates mirrors, system, and AUR — logs everything, trims old logs, and tells 
   ``` bash 
   sudo ~/arch-weekly-update
   ```
-🧾 Checking Logs
+## 🧾 Checking Logs
 - View the most recent update:
 ```bash
 sudo tail -n 30 /var/log/arch-weekly-update.log
